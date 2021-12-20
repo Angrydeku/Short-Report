@@ -1,7 +1,27 @@
+"""
+This model is based on the mussel physiology model of Ibarra et al., 2014.
+
+The parameters and functions are derived from the work of Barillé et al., 2011.
+
+Holly Giacamodonato and Isaac Greenberg are the contributors to this model.
+
+Barillé, L., Lerouxel, A., Dutertre, M., Haure, J., Barillé, A. L., Pouvreau, 
+    S., & Alunno-Bruscia, M. (2011). Growth of the Pacific oyster 
+    (Crassostrea gigas) in a high-turbidity environment: Comparison of model 
+    simulations based on scope for growth and dynamic energy budgets. Journal of 
+    Sea Research, 66(4), 392–402. https://doi.org/10.1016/j.seares.2011.07.004
+    
+Ibarra, D. A., Fennel, K., & Cullen, J. J. (2014). Coupling 3-D Eulerian
+    bio-physics (ROMS) with individual-based shellfish ecophysiology (SHELL-E): 
+    A hybrid model for carrying capacity and environmental impacts of bivalve 
+    aquaculture. Ecological Modelling, 273, 63–78. 
+    https://doi.org/10.1016/j.ecolmodel.2013.10.024
+"""
+
 def load_defaults():
     print('Loading defaults...')
     # Framework
-    days = 365 * 3 # Two years
+    days = 365 * 3 # Three years
     dt   = 0.01 # units: days    
     #url = 'https://coastwatch.pfeg.noaa.gov/erddap/griddap/ncdcOisst2Agg.htmlTable?sst%5B(2020-04-26T12:00:00Z):1:(2020-04-26T12:00:00Z)%5D%5B(0.0):1:(0.0)%5D%5B(47.135):1:(46.573)%5D%5B(-2.156):1:(-2.753)%5D,anom%5B(2020-04-26T12:00:00Z):1:(2020-04-26T12:00:00Z)%5D%5B(0.0):1:(0.0)%5D%5B(47.135):1:(46.573)%5D%5B(-2.156):1:(-2.753)%5D,err%5B(2020-04-26T12:00:00Z):1:(2020-04-26T12:00:00Z)%5D%5B(0.0):1:(0.0)%5D%5B(47.135):1:(46.573)%5D%5B(-2.156):1:(-2.753)%5D,ice%5B(2020-04-26T12:00:00Z):1:(2020-04-26T12:00:00Z)%5D%5B(0.0):1:(0.0)%5D%5B(47.135):1:(46.573)%5D%5B(-2.156):1:(-2.753)%5D'
     
@@ -25,10 +45,6 @@ def load_defaults():
     par['cms1'] = 0.0293 #maximal somatic growth parameter 1
     par['cms2'] = 0.044 #Maximal somatic growth parameter 2
     par['Shellgam'] = 0.5
-    
-    
-    
-
     
     # Initial conditions
     InitCond = {}
@@ -69,10 +85,12 @@ def run(days, dt, par, InitCond, TEMP):
     for t in range(0,NoSTEPS-1):
        
         #Forcing
+        
+        
         #forced average temperature, analytic
-        X = 0.5   #Food proxy, forced analytic
+        X = 0.5   #Food, forced analytic
        
-        #SP = 0 #Fix later
+       
         #DTM = 0 #Fix later
         f = X / (X + par['xk']) #Functional response, 
         INGtemp = par['Ing1'] * ((TEMP[t] - par['Ing2']) ** 2) # Effect of temperature on ingestion - Units: mg h−1 g−1
@@ -103,6 +121,7 @@ def run(days, dt, par, InitCond, TEMP):
         SOMAgain = min((maxSOMA), (ABSorg - SHELLgain)) - RESP
         dummySOMAg = SOMAgain
         
+        #Maximum dry tissue mass of a pacific oyster
         if SOMA[t] >= 1.5 :
             SOMAgain = 0
             
@@ -174,6 +193,7 @@ def plot(output):
     ax.legend(['B', 'SOMA', 'RESGON', 'SHELL']) 
     ax.set_ylabel('Mass (g)') 
     ax.set_xlabel('Time (years)')
+    ax.set_title('West France Pacific Oyster physiology model')
     plt.show()          
     
     return
